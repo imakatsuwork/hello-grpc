@@ -104,3 +104,25 @@ func (s *myServer) HelloClientStream(stream hellopb.GreetingService_HelloClientS
 		nameList = append(nameList, req.GetName())
 	}
 }
+
+func (s *myServer) HelloBidiStream(stream hellopb.GreetingService_HelloBidiStreamServer) error {
+	// returnすればストリームも終了
+
+	for {
+		// ストリームからリクエストを受け取っている
+		req, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		message := fmt.Sprintf("Hello, %v!", req.GetName())
+		// クライアントにレスポンスを送信
+		if err := stream.Send(&hellopb.HelloResponse{
+			Message: message,
+		}); err != nil {
+			return err
+		}
+	}
+}

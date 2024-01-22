@@ -46,7 +46,8 @@ func main() {
 		fmt.Println("1: send Request")
 		fmt.Println("2: send Request(Stream!!)")
 		fmt.Println("3: send Stream Request(Client Stream)")
-		fmt.Println("4: exit")
+		fmt.Println("4: send Stream Request(Bidirectional Stream)")
+		fmt.Println("5: exit")
 		fmt.Print("please enter >")
 
 		scanner.Scan()
@@ -63,6 +64,9 @@ func main() {
 			HelloClientStream()
 
 		case "4":
+			HelloBidiStream()
+
+		case "5":
 			fmt.Println("bye.")
 			goto M
 		}
@@ -142,5 +146,54 @@ func HelloClientStream() {
 		fmt.Println(err)
 	} else {
 		fmt.Println(res.GetMessage())
+	}
+}
+
+func HelloBidiStream() {
+	stream, err := client.HelloBidiStream(context.Background())
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	sendNum := 5
+	fmt.Printf("Please enter %d names.\n", sendNum)
+
+	var sendEnd, recvEnd bool
+	sendCount := 0
+	for !(sendEnd && recvEnd) {
+		// 送信処理
+		if !sendEnd {
+			scanner.Scan()
+			name := scanner.Text()
+
+			sendCount++
+			if err := stream.Send(&hellopb.HelloRequest{
+				Name: name,
+			}); err != nil {
+				fmt.Println(err)
+				sendEnd = true
+			}
+
+			if sendCount == sendNum {
+				sendEnd = true
+				// クライアント側でストリームをクローズしてる(送信)
+				if err := stream.CloseSend(); err != nil {
+					fmt.Println(err)
+				}
+			}
+		}
+
+		// 受信処理
+		if !recvEnd {
+			if res, err := stream.Recv(); err != nil {
+				if !errors.Is(err, io.EOF) {
+					fmt.Println(err)
+				}
+				recvEnd = true
+			} else {
+				fmt.Println(res.GetMessage())
+			}
+		}
 	}
 }
