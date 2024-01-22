@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	hellopb "grpc-sample/pkg/grpc"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -80,4 +82,25 @@ func (s *myServer) HelloServerStream(
 
 	// returnすればストリームも終了される(優秀)
 	return nil
+}
+
+func (s *myServer) HelloClientStream(stream hellopb.GreetingService_HelloClientStreamServer) error {
+	nameList := make([]string, 0)
+	for {
+		// ストリームからリクエストを受け取っている
+		req, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			// ストリームの終端操作
+			message := fmt.Sprintf("Hello, %v!", nameList)
+			// クライアントにレスポンスを送信
+			// サーバーストリームとは違って、明示的なクローズがされている
+			return stream.SendAndClose(&hellopb.HelloResponse{
+				Message: message,
+			})
+		}
+		if err != nil {
+			return err
+		}
+		nameList = append(nameList, req.GetName())
+	}
 }
