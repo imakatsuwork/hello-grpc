@@ -12,6 +12,7 @@ import (
 	"os/signal"
 	"time"
 
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
@@ -130,6 +131,10 @@ func (s *myServer) HelloBidiStream(stream hellopb.GreetingService_HelloBidiStrea
 }
 
 func (s *myServer) OccurError(_ context.Context, req *hellopb.HelloRequest) (*hellopb.HelloResponse, error) {
-	err := status.Errorf(codes.Unknown, "unknown error occurred by %s", req.Name)
+	stat := status.Newf(codes.Unknown, "unknown error occurred by %s", req.Name)
+	stat, _ = stat.WithDetails(&errdetails.DebugInfo{
+		Detail: "特に理由はないけどエラーです。",
+	})
+	err := stat.Err()
 	return nil, err
 }
