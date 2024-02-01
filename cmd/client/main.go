@@ -12,6 +12,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -47,7 +48,8 @@ func main() {
 		fmt.Println("2: send Request(Stream!!)")
 		fmt.Println("3: send Stream Request(Client Stream)")
 		fmt.Println("4: send Stream Request(Bidirectional Stream)")
-		fmt.Println("5: exit")
+		fmt.Println("5: Error!!")
+		fmt.Println("6: exit")
 		fmt.Print("please enter >")
 
 		scanner.Scan()
@@ -67,6 +69,9 @@ func main() {
 			HelloBidiStream()
 
 		case "5":
+			Error()
+
+		case "6":
 			fmt.Println("bye.")
 			goto M
 		}
@@ -85,6 +90,29 @@ func Hello() {
 	res, err := client.Hello(context.Background(), req)
 	if err != nil {
 		fmt.Println(err)
+	} else {
+		fmt.Println(res.GetMessage())
+	}
+}
+
+func Error() {
+	fmt.Println("Please enter your name.")
+	scanner.Scan()
+	name := scanner.Text()
+
+	req := &hellopb.HelloRequest{
+		Name: name,
+	}
+	res, err := client.OccurError(context.Background(), req)
+	if err != nil {
+		// status.FromError()がいい感じにやってくれる。すごく良い。
+		if stat, ok := status.FromError(err); ok {
+			fmt.Printf("code: %s\n", stat.Code())
+			fmt.Printf("message: %s\n", stat.Message())
+			fmt.Println(res)
+		} else {
+			fmt.Println(err)
+		}
 	} else {
 		fmt.Println(res.GetMessage())
 	}
