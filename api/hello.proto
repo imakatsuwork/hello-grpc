@@ -22,6 +22,9 @@ service GreetingService {
 
   // バイディレクショナルストリーミング
   rpc HelloBidiStream (stream HelloRequest) returns (stream HelloResponse);
+
+  // 意図的にエラーを発生させる
+  rpc OccurError (HelloRequest) returns (HelloResponse);
 }
 
 // 型の定義

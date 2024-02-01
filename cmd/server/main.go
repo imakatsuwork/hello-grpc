@@ -13,7 +13,9 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 )
 
 func main() {
@@ -125,4 +127,9 @@ func (s *myServer) HelloBidiStream(stream hellopb.GreetingService_HelloBidiStrea
 			return err
 		}
 	}
+}
+
+func (s *myServer) OccurError(_ context.Context, _ *hellopb.HelloRequest) (*hellopb.HelloResponse, error) {
+	err := status.Error(codes.Unknown, "unknown error occurred")
+	return nil, err
 }
