@@ -129,7 +129,7 @@ func (s *myServer) HelloBidiStream(stream hellopb.GreetingService_HelloBidiStrea
 	}
 }
 
-func (s *myServer) OccurError(_ context.Context, _ *hellopb.HelloRequest) (*hellopb.HelloResponse, error) {
-	err := status.Error(codes.Unknown, "unknown error occurred")
+func (s *myServer) OccurError(_ context.Context, req *hellopb.HelloRequest) (*hellopb.HelloResponse, error) {
+	err := status.Errorf(codes.Unknown, "unknown error occurred by %s", req.Name)
 	return nil, err
 }
