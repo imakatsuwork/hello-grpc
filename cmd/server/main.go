@@ -29,7 +29,11 @@ func main() {
 	}
 
 	// 2. gRPCサーバーを作成
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		// インターセプタが設定できる
+		// grpcパッケージが優秀すぎる
+		grpc.UnaryInterceptor(customUnaryServerInterceptor),
+	)
 
 	// 3. gRPCサーバーにGreetingServiceを登録
 	hellopb.RegisterGreetingServiceServer(s, NewMyServer())
