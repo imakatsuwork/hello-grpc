@@ -33,6 +33,9 @@ func main() {
 	conn, err := grpc.Dial(
 		address,
 
+		// クライアント側はコネクションの生成時にインターセプタを設定する
+		grpc.WithUnaryInterceptor(customUnaryClientInterceptor),
+
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
 	)
