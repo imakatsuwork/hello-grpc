@@ -35,6 +35,11 @@ func main() {
 
 		// クライアント側はコネクションの生成時にインターセプタを設定する
 		grpc.WithUnaryInterceptor(customUnaryClientInterceptor),
+		grpc.WithStreamInterceptor(customStreamClientInterceptor),
+		// 複数のUnaryClientInterceptorを設定する場合は、grpc.WithChainUnaryInterceptorを使う
+		// grpc.ChainUnaryInterceptor(customUnaryClientInterceptor, customUnaryClientInterceptor2),
+		// 複数のStreamClientInterceptorを設定する場合は、grpc.WithChainStreamInterceptorを使う
+		// grpc.ChainStreamInterceptor(customStreamClientInterceptor, customStreamClientInterceptor2),
 
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
