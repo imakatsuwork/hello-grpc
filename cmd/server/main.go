@@ -33,6 +33,13 @@ func main() {
 		// インターセプタが設定できる
 		// grpcパッケージが優秀すぎる
 		grpc.UnaryInterceptor(customUnaryServerInterceptor),
+
+		// Note: この書き方はpanicを起こす
+		//grpc.UnaryInterceptor(customUnaryServerInterceptor),
+		//grpc.UnaryInterceptor(customUnaryServerInterceptor2),
+		// 複数のUnaryInterceptorを設定する場合は、grpc.ChainUnaryInterceptorを使う
+		//grpc.ChainUnaryInterceptor(customUnaryServerInterceptor, customUnaryServerInterceptor2),
+
 		grpc.StreamInterceptor(customStreamServerInterceptor),
 	)
 
