@@ -81,6 +81,19 @@ func (s *myServer) Hello(ctx context.Context, req *hellopb.HelloRequest) (*hello
 		log.Println("[メタデータ]", md)
 	}
 
+	// メタデータを設定
+	headerMD := metadata.New(map[string]string{"type": "unary", "from": "server", "in": "header"})
+	// grpc.SetHeaderはレスポンスの最初に送るヘッダーフレーム
+	if err := grpc.SetHeader(ctx, headerMD); err != nil {
+		return nil, err
+	}
+
+	trailerMD := metadata.New(map[string]string{"type": "unary", "from": "server", "in": "trailer"})
+	// grpc.SetTrailerはレスポンスの最後に送るヘッダーフレーム
+	if err := grpc.SetTrailer(ctx, trailerMD); err != nil {
+		return nil, err
+	}
+
 	return &hellopb.HelloResponse{
 		Message: fmt.Sprintf("Hello %s!", req.Name),
 	}, nil
@@ -132,6 +145,26 @@ func (s *myServer) HelloBidiStream(stream hellopb.GreetingService_HelloBidiStrea
 	if md, ok := metadata.FromIncomingContext(stream.Context()); ok {
 		log.Println("[メタデータ]", md)
 	}
+
+	// メタデータを設定
+	// ヘッダーの送信タイミング:
+	// 1. SetHeaderを使用するとすぐにヘッダーを送信できる
+	// 2. 最初のメッセージが送信される時
+	// 3. ステータスコードが送信される時
+	headerMD := metadata.New(map[string]string{"type": "stream", "from": "server", "in": "header"})
+	if err := stream.SetHeader(headerMD); err != nil {
+		return err
+	}
+
+	// streamでSendHeaderを使用するとすぐにヘッダーを送信できる
+	//if err := stream.SendHeader(headerMD); err != nil {
+	//	return err
+	//}
+
+	// トレーラーはステータスコードが返却される時に送信される
+	trailerMD := metadata.New(map[string]string{"type": "stream", "from": "server", "in": "trailer"})
+	stream.SetTrailer(trailerMD)
+
 	// returnすればストリームも終了
 
 	for {
