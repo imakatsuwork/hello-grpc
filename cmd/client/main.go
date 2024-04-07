@@ -14,6 +14,7 @@ import (
 	_ "google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -97,7 +98,13 @@ func Hello() {
 	req := &hellopb.HelloRequest{
 		Name: name,
 	}
-	res, err := client.Hello(context.Background(), req)
+
+	ctx := context.Background()
+	// メタデータを扱うためのパッケージも用意されている
+	md := metadata.New(map[string]string{"type": "unary", "from": "client"})
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
+	res, err := client.Hello(ctx, req)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -189,7 +196,11 @@ func HelloClientStream() {
 }
 
 func HelloBidiStream() {
-	stream, err := client.HelloBidiStream(context.Background())
+	ctx := context.Background()
+	md := metadata.New(map[string]string{"type": "stream", "from": "client"})
+	ctx = metadata.NewOutgoingContext(ctx, md)
+
+	stream, err := client.HelloBidiStream(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return
