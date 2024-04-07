@@ -33,6 +33,7 @@ func main() {
 		// インターセプタが設定できる
 		// grpcパッケージが優秀すぎる
 		grpc.UnaryInterceptor(customUnaryServerInterceptor),
+		grpc.StreamInterceptor(customStreamServerInterceptor),
 	)
 
 	// 3. gRPCサーバーにGreetingServiceを登録
