@@ -15,6 +15,7 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
@@ -74,7 +75,12 @@ type myServer struct {
 	hellopb.UnimplementedGreetingServiceServer
 }
 
-func (s *myServer) Hello(_ context.Context, req *hellopb.HelloRequest) (*hellopb.HelloResponse, error) {
+func (s *myServer) Hello(ctx context.Context, req *hellopb.HelloRequest) (*hellopb.HelloResponse, error) {
+	// コンテキストからメタデータを取得
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		log.Println("[メタデータ]", md)
+	}
+
 	return &hellopb.HelloResponse{
 		Message: fmt.Sprintf("Hello %s!", req.Name),
 	}, nil
@@ -121,6 +127,11 @@ func (s *myServer) HelloClientStream(stream hellopb.GreetingService_HelloClientS
 }
 
 func (s *myServer) HelloBidiStream(stream hellopb.GreetingService_HelloBidiStreamServer) error {
+	// コンテキストからメタデータを取得
+	// streamからコンテキストを取得する
+	if md, ok := metadata.FromIncomingContext(stream.Context()); ok {
+		log.Println("[メタデータ]", md)
+	}
 	// returnすればストリームも終了
 
 	for {
