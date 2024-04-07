@@ -240,7 +240,18 @@ func HelloBidiStream() {
 		}
 
 		// 受信処理
+		var headerMD metadata.MD
 		if !recvEnd {
+			if headerMD == nil {
+				// streamから取得できる
+				headerMD, err = stream.Header()
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					fmt.Println(headerMD)
+				}
+			}
+
 			if res, err := stream.Recv(); err != nil {
 				if !errors.Is(err, io.EOF) {
 					fmt.Println(err)
@@ -251,4 +262,8 @@ func HelloBidiStream() {
 			}
 		}
 	}
+
+	// トレーラーの出力
+	trailerMD := stream.Trailer()
+	fmt.Println(trailerMD)
 }
