@@ -104,10 +104,15 @@ func Hello() {
 	md := metadata.New(map[string]string{"type": "unary", "from": "client"})
 	ctx = metadata.NewOutgoingContext(ctx, md)
 
-	res, err := client.Hello(ctx, req)
+	// メタデータを取得する場合は、grpc.CallOptionとして引数に設定する
+	var header, trailer metadata.MD
+	// この辺の関数設計は真似したい。(responseを複雑にしたり、戻り値の数を変えたりしなくてすむ)
+	res, err := client.Hello(ctx, req, grpc.Header(&header), grpc.Trailer(&trailer))
 	if err != nil {
 		fmt.Println(err)
 	} else {
+		fmt.Println(header)
+		fmt.Println(trailer)
 		fmt.Println(res.GetMessage())
 	}
 }
