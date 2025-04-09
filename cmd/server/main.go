@@ -22,7 +22,7 @@ import (
 
 func main() {
 
-	// 1. 8080番ポートでリッスンする
+	// 1. 8080番ポートでリッスン
 	port := 8080
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
